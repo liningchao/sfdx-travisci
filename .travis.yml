@@ -23,10 +23,6 @@ before_install:
 install: true
 jobs:
   include:
-  - stage: review
-    if: type = pull_request
-    script:
-    - sfdx force:source:deploy -u HubOrg -p force-app
   - stage: deploy
     if: type = push
     script:
