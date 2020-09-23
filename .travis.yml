@@ -15,15 +15,19 @@ before_install:
 - wget -qO- $URL | tar xJ -C sfdx --strip-components 1
 - "./sfdx/install"
 - export PATH=./sfdx/$(pwd):$PATH
+- sfdx update
 - sfdx --version
 - sfdx plugins --core
 - sfdx force:auth:jwt:grant --clientid $CONSUMERKEY --jwtkeyfile assets/server.key
   --username $USERNAME --setdefaultdevhubusername -a HubOrg
-script:
-- sfdx force:source:deploy -u MyOrg -p force-app
-# - sfdx force:org:create -v HubOrg -s -f config/project-scratch-def.json -a ciorg --wait
-#   3
-# - sfdx force:org:display -u ciorg
-# - sfdx force:source:push -u ciorg
-# - sfdx force:apex:test:run -u ciorg --wait 10
-# - sfdx force:org:delete -u ciorg -p
+install: true
+jobs:
+  include:
+  - stage: review
+    if: type = pull_request
+    script:
+    - sfdx force:source:deploy -u HubOrg -p force-app
+  - stage: deploy
+    if: type = push
+    script:
+    - sfdx force:source:deploy -u HubOrg -p force-app
